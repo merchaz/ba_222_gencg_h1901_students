@@ -6,7 +6,7 @@ var drawMode;
 function setup() {
   createCanvas(windowWidth, windowHeight);
   frameRate(10);
-  for (var i = 0; i < 100; i++) {
+  for (var i = 0; i < 50; i++) {
     stars.push(new Star());
   }
   shootingStar = new ShootingStar();
@@ -26,20 +26,6 @@ function draw() {
   shootingStar.draw();
   moon.draw();
   rotateSky(drawMode);
-  
-  fill(180,180,180);
-  stroke(255);
-
-  beginShape();
-  for (var x = 0; x < width; x++) {
-	var nx = map(x, 0, width, 0, 10);
-	var y = (windowHeight) * noise(nx);
-	vertex(x, y);
-  }
-  vertex(windowWidth, windowHeight);
-  vertex(0,windowHeight);
-  vertex(0,0);
-  endShape();
 }
 
 function setGradient(x, y, w, h, c1, c2, axis) {
@@ -57,15 +43,15 @@ function setGradient(x, y, w, h, c1, c2, axis) {
       var d = lerpColor(c1, c2, inter2);
       stroke(d);
       line(j, y, j, y + h);
-    }	
+    }
   }
 }
 
 function Star() {
   this.x = random(windowWidth);
-  this.y = random(windowHeight + 400) - 400;
-  this.w = 2;//windowHeight / 200;
-  this.h = 2;//windowHeight / 200;
+  this.y = random(windowHeight - 200);
+  this.w = 2;
+  this.h = 2;
 }
 
 Star.prototype.draw = function() {
@@ -85,7 +71,7 @@ function ShootingStar() {
   this.x = random(windowWidth - 200);
   this.y = random(windowHeight - 400);
   this.w = 20;
-  this.h = 5;
+  this.h = 2;
 }
 
 ShootingStar.prototype.draw = function() {
@@ -93,7 +79,7 @@ ShootingStar.prototype.draw = function() {
   fill(255, 255, 0);
   ellipse(this.x, this.y, this.w, this.h);
   if (this.h > 0) {
-    this.h -= 0.2;
+    this.h -= 0.5;
   }
   this.w += 7;
   this.x += 5;
