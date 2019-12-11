@@ -1,75 +1,145 @@
-// Copyright (c) 2018 ml5
-//
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
-
-/* ===
-ml5 Example
-PoseNet example using p5.js
-=== */
-
-let video;
-let poseNet;
-let poses = [];
+var stars = [];
+var shootingStar;
+var moon;
+var drawMode;
+var pg;
 
 function setup() {
-  createCanvas(640, 480);
-  video = createCapture(VIDEO);
-  video.size(width, height);
-
-  // Create a new poseNet method with a single detection
-  poseNet = ml5.poseNet(video, modelReady);
-  // This sets up an event that fills the global variable "poses"
-  // with an array every time new poses are detected
-  poseNet.on('pose', function(results) {
-    poses = results;
-  });
-  // Hide the video element, and just show the canvas
-  video.hide();
-}
-
-function modelReady() {
-  select('#status').html('Model Loaded');
+	pixelDensity(1);
+  createCanvas(windowWidth, windowHeight);
+  frameRate(10);
+  for (var i = 0; i < 100; i++) {
+    stars.push(new Star());
+  }
+  shootingStar = new ShootingStar();
+  moon = new Moon();
+  drawMode = 1;
+  pg = createGraphics(windowWidth, windowHeight);
 }
 
 function draw() {
-  image(video, 0, 0, width, height);
+  background(220);
+  var color1 = color(0, 0, 153);
+  var color2 = color(204, 51, 0);
+  setGradient(0, 0, windowWidth, windowHeight, color1, color2, "Y");
 
-  // We can call both functions to draw all keypoints and the skeletons
-  drawKeypoints();
-  drawSkeleton();
+  for (var i = 0; i < 50; i++) {
+    stars[i].draw();
+  }
+  shootingStar.draw();
+  moon.draw();
+  rotateSky(drawMode);
+  
+  
+  drawMountain();
+  image(pg, 0, windowHeight/2, 0, 0);
 }
 
-// A function to draw ellipses over the detected keypoints
-function drawKeypoints()  {
-  // Loop through all the poses detected
-  for (let i = 0; i < poses.length; i++) {
-    // For each pose detected, loop through all the keypoints
-    let pose = poses[i].pose;
-    for (let j = 0; j < pose.keypoints.length; j++) {
-      // A keypoint is an object describing a body part (like rightArm or leftShoulder)
-      let keypoint = pose.keypoints[j];
-      // Only draw an ellipse is the pose probability is bigger than 0.2
-      if (keypoint.score > 0.2) {
-        fill(255, 0, 0);
-        noStroke();
-        ellipse(keypoint.position.x, keypoint.position.y, 10, 10);
-      }
+function drawMountain(){
+	
+  //setGradient(0, 0, windowWidth, windowHeight, color(0, 0, 0), color(255,255,255), "Y");
+  pg.stroke(255);
+  pg.fill(180,180,180);
+  pg.beginShape();
+  for (var x = 0; x < width; x++) {
+	var nx = map(x, 0, width, 0, 10);
+	var y = (windowHeight/2) * noise(nx);
+	pg.vertex(x, y/2);
+  }
+  pg.vertex(windowWidth, windowHeight);
+  pg.vertex(0,windowHeight);
+  pg.vertex(0,0);
+  pg.endShape();
+}
+
+function setGradient(x, y, w, h, c1, c2, axis) {
+  noFill();
+  if (axis == "Y") { // Top to bottom gradient
+    for (let i = y; i <= y + h; i++) {
+      var inter = map(i, y, y + h, 0, 1);
+      var c = lerpColor(c1, c2, inter);
+      stroke(c);
+      line(x, i, x + w, i);
     }
   }
 }
 
-// A function to draw the skeletons
-function drawSkeleton() {
-  // Loop through all the skeletons detected
-  for (let i = 0; i < poses.length; i++) {
-    let skeleton = poses[i].skeleton;
-    // For every skeleton, loop through all body connections
-    for (let j = 0; j < skeleton.length; j++) {
-      let partA = skeleton[j][0];
-      let partB = skeleton[j][1];
-      stroke(255, 0, 0);
-      line(partA.position.x, partA.position.y, partB.position.x, partB.position.y);
-    }
+function Star() {
+  this.x = random(windowWidth);
+  this.y = random(windowHeight + 400) - 400;
+  this.w = 5;//windowHeight / 200;
+  this.h = 5;//windowHeight / 200;
+}
+
+Star.prototype.draw = function() {
+  noStroke();
+  fill(255, 255, 0);
+  ellipse(this.x, this.y, this.w, this.h);
+  if (this.w == 5) {
+    this.w = 8;
+    this.h = 8;
+  } else {
+    this.w = 5;
+    this.h = 5;
   }
+}
+
+function ShootingStar() {
+  this.x = random(windowWidth - 200);
+  this.y = random(windowHeight - 400);
+  this.w = 20;
+  this.h = 5;
+}
+
+ShootingStar.prototype.draw = function() {
+  noStroke();
+  fill(255, 255, 0);
+  ellipse(this.x, this.y, this.w, this.h);
+  if (this.h > 0) {
+    this.h -= 0.2;
+  }
+  this.w += 7;
+  this.x += 5;
+}
+
+function Moon() {
+  this.x = windowWidth / 2;
+  if(drawMode == 1){
+	this.y = 0;
+	} 
+  else {
+	  this.y = windowHeight;
+	}
+  this.w = windowHeight / 10;
+  this.h = windowHeight / 10;
+}
+
+Moon.prototype.draw = function() {
+  noStroke();
+  fill(255, 255, 0);
+  ellipse(this.x, this.y, this.w, this.h);
+  //this.y += 1;
+}
+
+function keyPressed() {
+
+  if (keyCode === 32) setup() // 32 = Space
+  if (keyCode === 38) drawMode = 2 // 38 = ArrowUp
+  if (keyCode === 40) drawMode = 1 // 40 = ArrowDown
+
+}
+
+function rotateSky(drawMode){
+	if(drawMode == 1){
+		moon.y += 1;
+		for (var i = 0; i < 50; i++) {
+			stars[i].y += 1;
+		}
+	}
+	else if(drawMode == 2){
+		moon.y -= 1;
+		for (var i = 0; i < 50; i++) {
+			stars[i].y -= 1;
+		}
+	}
 }
