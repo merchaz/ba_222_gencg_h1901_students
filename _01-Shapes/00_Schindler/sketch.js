@@ -7,13 +7,12 @@ var pg;
 function setup() {
 	pixelDensity(1);
   createCanvas(windowWidth, windowHeight);
-  frameRate(10);
+  frameRate(60);
   for (var i = 0; i < 100; i++) {
     stars.push(new Star());
   }
   shootingStar = new ShootingStar();
   moon = new Moon();
-  //drawMode = 1;
   pg = createGraphics(windowWidth, windowHeight);
 }
 
@@ -48,7 +47,7 @@ function drawMountain(){
   }
   pg.vertex(windowWidth, windowHeight);
   pg.vertex(0,windowHeight);
-  pg.vertex(0,0);
+  //pg.vertex(0,0);
   pg.endShape();
 }
 
@@ -76,8 +75,8 @@ Star.prototype.draw = function() {
   fill(255, 255, 0);
   ellipse(this.x, this.y, this.w, this.h);
   if (this.w == 5) {
-    this.w = 8;
-    this.h = 8;
+    this.w = 7;
+    this.h = 7;
   } else {
     this.w = 5;
     this.h = 5;
@@ -104,11 +103,11 @@ ShootingStar.prototype.draw = function() {
 
 function Moon() {
   this.x = windowWidth / 2;
-  if(drawMode == 1){
-	this.y = 0;
+  if(drawMode == 2){
+	this.y = windowHeight/5;
 	} 
   else {
-	  this.y = windowHeight - windowHeight/5;
+	  this.y = windowHeight - windowHeight/3;
 	}
   this.w = windowHeight / 10;
   this.h = windowHeight / 10;
@@ -130,13 +129,13 @@ function keyPressed() {
 }
 
 function rotateSky(drawMode){
-	if(drawMode == 1){
+	if(drawMode == 2){
 		moon.y += 1;
 		for (var i = 0; i < 50; i++) {
 			stars[i].y += 1;
 		}
 	}
-	else if(drawMode == 2){
+	else if(drawMode == 1){
 		moon.y -= 1;
 		for (var i = 0; i < 50; i++) {
 			stars[i].y -= 1;
