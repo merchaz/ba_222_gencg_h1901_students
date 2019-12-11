@@ -2,8 +2,10 @@ var stars = [];
 var shootingStar;
 var moon;
 var drawMode;
+var pg;
 
 function setup() {
+	pixelDensity(1);
   createCanvas(windowWidth, windowHeight);
   frameRate(10);
   for (var i = 0; i < 100; i++) {
@@ -12,6 +14,7 @@ function setup() {
   shootingStar = new ShootingStar();
   moon = new Moon();
   drawMode = 1;
+  pg = createGraphics(windowWidth, windowHeight);
 }
 
 function draw() {
@@ -27,19 +30,26 @@ function draw() {
   moon.draw();
   rotateSky(drawMode);
   
-  fill(180,180,180);
-  stroke(255);
+  
+  drawMountain();
+  image(pg, 0, windowHeight/2, 0, 0);
+}
 
-  beginShape();
+function drawMountain(){
+	
+  //setGradient(0, 0, windowWidth, windowHeight, color(0, 0, 0), color(255,255,255), "Y");
+  pg.stroke(255);
+  pg.fill(180,180,180);
+  pg.beginShape();
   for (var x = 0; x < width; x++) {
 	var nx = map(x, 0, width, 0, 10);
-	var y = (windowHeight) * noise(nx);
-	vertex(x, y);
+	var y = (windowHeight/2) * noise(nx);
+	pg.vertex(x, y/2);
   }
-  vertex(windowWidth, windowHeight);
-  vertex(0,windowHeight);
-  vertex(0,0);
-  endShape();
+  pg.vertex(windowWidth, windowHeight);
+  pg.vertex(0,windowHeight);
+  pg.vertex(0,0);
+  pg.endShape();
 }
 
 function setGradient(x, y, w, h, c1, c2, axis) {
@@ -51,33 +61,26 @@ function setGradient(x, y, w, h, c1, c2, axis) {
       stroke(c);
       line(x, i, x + w, i);
     }
-  } else if (axis == "X") { // Left to right gradient
-    for (let j = x; j <= x + w; j++) {
-      var inter2 = map(j, x, x + w, 0, 1);
-      var d = lerpColor(c1, c2, inter2);
-      stroke(d);
-      line(j, y, j, y + h);
-    }	
   }
 }
 
 function Star() {
   this.x = random(windowWidth);
   this.y = random(windowHeight + 400) - 400;
-  this.w = 2;//windowHeight / 200;
-  this.h = 2;//windowHeight / 200;
+  this.w = 5;//windowHeight / 200;
+  this.h = 5;//windowHeight / 200;
 }
 
 Star.prototype.draw = function() {
   noStroke();
   fill(255, 255, 0);
   ellipse(this.x, this.y, this.w, this.h);
-  if (this.w == 2) {
-    this.w = 3;
-    this.h = 3;
+  if (this.w == 5) {
+    this.w = 8;
+    this.h = 8;
   } else {
-    this.w = 2;
-    this.h = 2;
+    this.w = 5;
+    this.h = 5;
   }
 }
 
@@ -101,9 +104,14 @@ ShootingStar.prototype.draw = function() {
 
 function Moon() {
   this.x = windowWidth / 2;
-  this.y = random(windowHeight - 50);
-  this.w = 50;
-  this.h = 50;
+  if(drawMode == 1){
+	this.y = 0;
+	} 
+  else {
+	  this.y = windowHeight;
+	}
+  this.w = windowHeight / 10;
+  this.h = windowHeight / 10;
 }
 
 Moon.prototype.draw = function() {
