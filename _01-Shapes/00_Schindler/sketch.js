@@ -20,7 +20,7 @@ function draw() {
   background(220);
   var color1 = color(0, 0, 153);
   var color2 = color(204, 51, 0);
-  setGradient(0, 0, windowWidth, windowHeight, color1, color2, "Y");
+  setGradient(0, 0, windowWidth, windowHeight, color1, color2);
 
   for (var i = 0; i < 50; i++) {
     stars[i].draw();
@@ -28,16 +28,12 @@ function draw() {
   shootingStar.draw();
   moon.draw();
   rotateSky(drawMode);
-  
-  
   drawMountain();
   image(pg, 0, windowHeight/2, 0, 0);
 }
 
 function drawMountain(){
-	
-  //setGradient(0, 0, windowWidth, windowHeight, color(0, 0, 0), color(255,255,255), "Y");
-  pg.stroke(255);
+  pg.noStroke();//stroke(255);
   pg.fill(180,180,180);
   pg.beginShape();
   for (var x = 0; x < width; x++) {
@@ -47,20 +43,17 @@ function drawMountain(){
   }
   pg.vertex(windowWidth, windowHeight);
   pg.vertex(0,windowHeight);
-  //pg.vertex(0,0);
   pg.endShape();
 }
 
 function setGradient(x, y, w, h, c1, c2, axis) {
   noFill();
-  if (axis == "Y") { // Top to bottom gradient
     for (let i = y; i <= y + h; i++) {
       var inter = map(i, y, y + h, 0, 1);
       var c = lerpColor(c1, c2, inter);
       stroke(c);
       line(x, i, x + w, i);
-    }
-  }
+    }  
 }
 
 function Star() {
@@ -74,10 +67,10 @@ Star.prototype.draw = function() {
   noStroke();
   fill(255, 255, 0);
   ellipse(this.x, this.y, this.w, this.h);
-  if (this.w == 5) {
+  if (this.w == 5 && frameCount % 5 == 0) {
     this.w = 7;
     this.h = 7;
-  } else {
+  } else if(this.w == 7 && frameCount % 5 == 0){
     this.w = 5;
     this.h = 5;
   }
