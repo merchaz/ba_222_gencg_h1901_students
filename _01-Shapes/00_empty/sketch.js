@@ -13,7 +13,7 @@ function setup() {
   }
   shootingStar = new ShootingStar();
   moon = new Moon();
-  drawMode = 1;
+  //drawMode = 1;
   pg = createGraphics(windowWidth, windowHeight);
 }
 
@@ -108,7 +108,7 @@ function Moon() {
 	this.y = 0;
 	} 
   else {
-	  this.y = windowHeight;
+	  this.y = windowHeight - windowHeight/5;
 	}
   this.w = windowHeight / 10;
   this.h = windowHeight / 10;
@@ -141,5 +141,8 @@ function rotateSky(drawMode){
 		for (var i = 0; i < 50; i++) {
 			stars[i].y -= 1;
 		}
+	}
+	else {
+		// do nothing
 	}
 }
