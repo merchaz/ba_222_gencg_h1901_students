@@ -1,6 +1,10 @@
+// Based on the code P_2_0_03.pde from
+// Based on the code P_2_0_02.pde from
+// Generative Gestaltung, ISBN: 978-3-87439-759-9
 
 // Global var
-var canvas;
+var b = 255, p = false;
+var strokeColor, canvas;
  
 var lines = [];
 var planets = [];
@@ -28,7 +32,14 @@ function setup() {
   var density = displayDensity();
   pixelDensity(density);
   smooth();
+}
 
+function draw() {
+  background(0);
+  stroke(255);
+  smooth();
+  noFill();
+  
   for (let index = 0; index < 150; index++) {
     if (index % 30 == 0) {
       planets.push(new Planet());
@@ -39,19 +50,6 @@ function setup() {
   }
 }
 
-function draw() {
-  background(0);
-  stroke(255);
-  for (let i = 0; i < lines.length; i++) {
-    strokeWeight(5);
-    lines[i].move();
-    lines[i].display();
-  }
-  for (let i = 0; i < planets.length; i++) {
-    planets[i].move();
-    planets[i].display();
-  }
-}
 function keyPressed() {
   // Clear sketch
   if (keyCode === 32) background(255) // 32 = SPACE BAR 
