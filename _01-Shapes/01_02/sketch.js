@@ -1,101 +1,148 @@
-// Based on the code P_2_0_03.pde from
+// Based on the code P_2_0_02.pde from
 // Generative Gestaltung, ISBN: 978-3-87439-759-9
-
 // Global var
 var b = 255, p = false;
-var strokeColor, canvas;
- 
+var lines = [];
+var planets = [];
+var overallIndexLines;
+var overallIndexPlanets;
+var firstCreationLine;
+var firstCreationPlanet;
+var speed;
+var lineLength;
+
 function setup() {
-  // Canvas setup
-  canvas = createCanvas(windowWidth, windowHeight-45);
+  // Canvas setup and variables
+  canvas = createCanvas(windowWidth, windowHeight);
   canvas.parent("p5Container");
-  // Detect screen density (retina)
+  overallIndexLines = 0;
+  overallIndexPlanets = 0;
+  lastXPos = 0;
+  firstCreationLine = true;
+  firstCreationPlanet = true;
+  lineLength = height * 2;// / 3 * 2;
+  speed = 20;
+
+  // drawing modes
+  frameRate(30);
   var density = displayDensity();
   pixelDensity(density);
-  // Colors and drawing modes
-  colorMode(HSL, 360, 100, 100, 100);
-  background(360);
-  strokeColor = color(0, 10);
+  background(0);
   smooth();
-  // Init Var
-}
-
-function draw() {
-  smooth();
-  noFill();
-
-  if (p) {
-    b = random(255);
-    push();
-
-    translate(width / 2, height / 2);
-
-    var circleResolution = toInt(map(mouseY + 100, 0, height, 2, 10));
-    var radius = mouseX - width / 2 + 0.5;
-    var angle = TWO_PI / circleResolution;
-
-    strokeWeight(2);
-    stroke(strokeColor);
-
-    beginShape();
-    for (i = 0; i <= circleResolution; i++) {
-      var x = 0 + cos(angle * i) * radius;
-      var y = 0 + sin(angle * i) * radius;
-      vertex(x, y);
+  
+  for (let index = 0; index < 150; index++) {
+    if (index % 30 == 0) {
+      planets.push(new Planet());
     }
-    endShape();
-
-    pop();
+    else {
+      lines.push(new randLine(true));
+    }  
   }
 }
 
-function mousePressed() {
-  p = true;
-}
+function draw() {
+  background(0);
+  stroke(255);
+  for (let i = 0; i < lines.length; i++) {
+    strokeWeight(5);
+    lines[i].move();
+    lines[i].display();
+  }
+  for (let i = 0; i < planets.length; i++) {
+    planets[i].move();
+    planets[i].display();
+  }
 
-function mouseReleased() {
-  p = false;
+  console.log(lines.length);
 }
 
 function keyPressed() {
   // Clear sketch
   if (keyCode === 32) background(255) // 32 = SPACE BAR 
-  if (key == 's' || key == 'S') saveThumb(650, 350);
-  //
-  switch (key) {
-    case '1':
-      strokeColor = color(0, 50, 50, 10);
-      break;
-    case '2':
-      strokeColor = color(192, 100, 64, 10);
-      break;
-    case '3':
-      strokeColor = color(52, 100, 71, 10);
-      break;
-  }
-
-}
-
-
-// Tools
-
-// resize canvas when the window is resized
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight, false);
-}
-
-// Int conversion
-function toInt(value) {
-  return ~~value;
-}
-
-// Timestamp
-function timestamp() {
-  return Date.now();
+  if (key == 's' || key == 'S') saveThumb(width, height);
 }
 
 // Thumb
 function saveThumb(w, h) {
   let img = get( width/2-w/2, height/2-h/2, w, h);
   save(img,'thumb.jpg');
+}
+
+class randLine {
+  constructor(firstIteration) {
+    this.arIndex = overallIndexLines;
+    overallIndexLines++;
+    if (firstIteration) {
+      this.x1 = int(random(width));
+      this.x2 = this.x1;
+      this.y1 = int(random(height * 2));
+      this.y2 = this.y1 + lineLength;
+    } else {
+      this.x1 = int(random(width));
+      this.x2 = this.x1;
+      this.y1 = height + int(random(height));;
+      this.y2 = this.y1 + lineLength;
+    }
+    lastXPos = this.x1;
+  }
+
+  move() {
+    this.y1 -= speed;
+    this.y2 -= speed;
+    
+    if (this.y2 < 0) {
+        lines.splice(this.arIndex, 1);
+        firstCreationLine = false;
+        for (let index = this.arIndex; index < lines.length; index++) {
+          lines[index].arIndex--;          
+        }
+      overallIndexLines--;
+      lines.push(new randLine(false));    
+    }
+    
+  }
+
+  display() {
+    line(this.x1, this.y1, this.x2, this.y2);
+  }
+}
+
+class Planet {
+
+  constructor(firstIteration) {
+    this.arIndex = overallIndexPlanets;
+    overallIndexPlanets++;
+    if (firstIteration) {
+      this.xPos = int(random(width));
+      this.yPos = height + int(random(10000));
+      this.diameter = random(100, 300);
+      
+    } else {
+      this.xPos = int(random(width));
+      this.yPos = height + int(random(10000));
+      this.diameter = random(100, 300);
+    }
+  }
+
+  move(){
+    this.yPos -= speed;
+
+    if (this.yPos + this.diameter < 0) {
+      planets.splice(this.arIndex, 1);
+      firstCreationPlanet = false;
+      for (let index = this.arIndex; index < planets.length; index++) {
+        planets[index].arIndex--;          
+      }
+    overallIndexPlanets--;
+    planets.push(new Planet(false));    
+  }
+  }
+
+  display(){
+    noStroke();
+    fill(255);
+    ellipse(this.xPos, this.yPos, this.diameter);
+    fill(0);
+    ellipse(this.xPos+5, this.yPos+7, this.diameter);
+  }
 }
