@@ -1,7 +1,7 @@
 ---
 layout: sketch
 title: "01_01" 
-category: "Schindler" 
+category: "Experiment" 
 thumb_name: "thumb.jpg"
 includes:
   - src: "sketch.js"
