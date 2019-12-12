@@ -5,9 +5,10 @@
 # baseurl: "students-test/" # the subpath of your site, e.g. /blog/
 # url: "" # the base hostname & protocol for your site
 
-github_username: merchaz
+twitter_username: yourname
+github_username: yourname
 title: I.BA_222_GENCG.H1901
-subtitle: I.BA_222_GENCG.H1901 - Winter 2019 - Marc Häusler
+subtitle: I.BA_222_GENCG.H1901 - Winter 2019
 
 # # Build settings
 # markdown: kramdown
