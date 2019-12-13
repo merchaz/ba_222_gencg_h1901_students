@@ -33,9 +33,11 @@ function setup() {
   pixelDensity(density);
   smooth();
 
+  var lastYplanet = 0;
   for (let index = 0; index < 150; index++) {
     if (index % 30 == 0) {
-      planets.push(new Planet());
+      planets.push(new Planet(lastYplanet));
+      lastYplanet += 500;
     }
     else {
       lines.push(new randLine());
@@ -71,7 +73,7 @@ function saveThumb(w, h) {
 }
 
 class randLine {
-  constructor(firstIteration) {
+  constructor() {
     this.arIndex = overallIndexLines;
     overallIndexLines++; 
       if (direction == "up") {
@@ -88,7 +90,6 @@ class randLine {
       }
   }
 
-  // Tools
   move() {
     if (direction == "up") {
       this.y1 -= speed;
@@ -116,12 +117,13 @@ class randLine {
 }
 
 class Planet {
-  constructor(firstIteration) {
+  constructor(lastYpos) {
     this.arIndex = overallIndexPlanets;
     overallIndexPlanets++;
     if (direction == "up") {
       this.xPos = int(random(width));
-      this.yPos = height + int(random(height)) + 200;
+      debugger;
+      this.yPos = height + int(random(height)) + lastYpos;
       this.diameter = int(random(height / 6, height / 3));
     }
     else if (direction == "down") {
@@ -145,7 +147,7 @@ class Planet {
       this.yPos += speed;
       if (this.yPos - this.diameter > height) {
         this.xPos = int(random(width));
-        this.yPos = 0 - int(random(height));
+        this.yPos = 0 - int(random(height)) - 2000;
         this.diameter = int(random(height / 6, height / 3));
       }
     }
