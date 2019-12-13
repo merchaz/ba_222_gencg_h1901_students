@@ -12,11 +12,32 @@ var speed;
 var lineLength;
 var direction;
 var spliceCtrLine;
+let stepSize, rideDuration, startTime;
+let graphics, app;
+let capturer, fps;
 
 function setup() {
-  // Canvas setup and variables
-  canvas = createCanvas(windowWidth, windowHeight);
-  canvas.parent("p5Container");
+  var density = displayDensity();
+  pixelDensity(density);
+  createCanvas(6480 / density, 3840 / density);
+
+  // Capture settings
+  fps = 60;
+  capturer = new CCapture({ format: 'png', framerate: fps });
+
+  // this is optional, but lets us see how the animation will look in browser.
+  frameRate(fps);
+
+  // start the recording
+  capturer.start();
+
+  // Init Var
+  objects = [...Array(1000)].map(e => [random(width), random(height)]);  
+  startTime = millis();
+  rideDuration = getRideDuration(2);
+
+  //canvas = createCanvas(windowWidth, windowHeight);
+  //canvas.parent("p5Container");
   overallIndexLines = 0;
   overallIndexPlanets = 0;
   lastXPos = 0;
@@ -27,11 +48,6 @@ function setup() {
   direction = "up";
   spliceCtrLine = 0;
 
-  // drawing modes
-  frameRate(30);
-  var density = displayDensity();
-  pixelDensity(density);
-  smooth();
 
   var lastYplanet = 0;
   for (let index = 0; index < 150; index++) {
@@ -48,6 +64,21 @@ function setup() {
 function draw() {
   background(0);
   stroke(255);
+
+  // duration in milliseconds
+  var duration = 5;
+  var t = (millis() - startTime)/1000;
+
+  // if we have passed t=duration then end the animation.
+  if (t > duration) {
+    noLoop();
+    console.log('finished recording.');
+    capturer.stop();
+    capturer.save();
+    return;
+  }
+  
+
   for (let i = 0; i < lines.length; i++) {
     strokeWeight(5);
     lines[i].move();
@@ -57,7 +88,10 @@ function draw() {
     planets[i].move();
     planets[i].display();
   }
+
+  capturer.capture(document.getElementById('defaultCanvas0'));
 }
+
 function keyPressed() {
   // Clear sketch
   if (keyCode === 32) background(255) // 32 = SPACE BAR 
