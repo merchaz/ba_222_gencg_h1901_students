@@ -75,19 +75,20 @@ function saveThumb(w, h) {
 class randLine {
   constructor() {
     this.arIndex = overallIndexLines;
-    overallIndexLines++; 
-      if (direction == "up") {
-        this.x1 = int(random(width));
-        this.x2 = this.x1;
-        this.y1 = int(random(height * 2));
-        this.y2 = this.y1 + lineLength;
-      }
-      else if (direction == "down") {
-        this.x1 = int(random(width));
-        this.x2 = this.x1;
-        this.y1 = 0 - int(random(height * 2));
-        this.y2 = this.y1 - lineLength;
-      }
+    overallIndexLines++;
+    if (direction == "up") {
+      this.x1 = int(random(width));
+      this.x2 = this.x1;
+      this.y1 = int(random(height * 3));
+      this.y2 = this.y1 + lineLength;
+    }
+    else if (direction == "down") {
+      this.x1 = int(random(width));
+      this.x2 = this.x1;
+      this.y1 = 0 - int(random(height * 5));
+      debugger;
+      this.y2 = this.y1 - lineLength;
+    }
   }
 
   move() {
@@ -122,7 +123,6 @@ class Planet {
     overallIndexPlanets++;
     if (direction == "up") {
       this.xPos = int(random(width));
-      debugger;
       this.yPos = height + int(random(height)) + lastYpos;
       this.diameter = int(random(height / 6, height / 3));
     }
