@@ -11,6 +11,7 @@ var firstCreationPlanet;
 var speed;
 var lineLength;
 var direction;
+var spliceCtrLine;
 
 function setup() {
   // Canvas setup and variables
@@ -24,6 +25,7 @@ function setup() {
   lineLength = height * 2;// / 3 * 2;
   speed = 20;
   direction = "up";
+  spliceCtrLine = 0;
 
   // drawing modes
   frameRate(30);
@@ -36,7 +38,7 @@ function setup() {
       planets.push(new Planet());
     }
     else {
-      lines.push(new randLine(true));
+      lines.push(new randLine());
     }
   }
 }
@@ -71,8 +73,7 @@ function saveThumb(w, h) {
 class randLine {
   constructor(firstIteration) {
     this.arIndex = overallIndexLines;
-    overallIndexLines++;
-    if (firstIteration) {
+    overallIndexLines++; 
       if (direction == "up") {
         this.x1 = int(random(width));
         this.x2 = this.x1;
@@ -85,22 +86,6 @@ class randLine {
         this.y1 = 0 - int(random(height * 2));
         this.y2 = this.y1 - lineLength;
       }
-      
-    } else {
-      if (direction == "up") {
-        this.x1 = int(random(width));
-        this.x2 = this.x1;
-        this.y1 = height + int(random(height));;
-        this.y2 = this.y1 + lineLength;
-      }
-      else if (direction == "down") {
-        this.x1 = int(random(width));
-        this.x2 = this.x1;
-        this.y1 = 0 - int(random(height));;
-        this.y2 = this.y1 - lineLength;
-      }
-    }
-    //lastXPos = this.x1;
   }
 
   // Tools
@@ -110,13 +95,8 @@ class randLine {
       this.y2 -= speed;
 
       if (this.y2 < 0) {
-        lines.splice(this.arIndex, 1);
-        firstCreationLine = false;
-        for (let index = this.arIndex; index < lines.length; index++) {
-          lines[index].arIndex--;
-        }
-        overallIndexLines--;
-        lines.push(new randLine(false));
+        this.y1 = height + int(random(height));
+        this.y2 = this.y1 + lineLength;
       }
     }
     else if (direction == "down") {
@@ -124,16 +104,10 @@ class randLine {
       this.y2 += speed;
 
       if (this.y2 > height) {
-        lines.splice(this.arIndex, 1);
-        firstCreationLine = false;
-        for (let index = this.arIndex; index < lines.length; index++) {
-          lines[index].arIndex--;
-        }
-        overallIndexLines--;
-        lines.push(new randLine(false));
+        this.y1 = 0 - int(random(height));
+        this.y2 = this.y1 - lineLength;
       }
     }
-
   }
 
   display() {
@@ -142,34 +116,18 @@ class randLine {
 }
 
 class Planet {
-
   constructor(firstIteration) {
     this.arIndex = overallIndexPlanets;
     overallIndexPlanets++;
-    if (firstIteration) {
-      if (direction == "up") {
-        this.xPos = int(random(width));
-        this.yPos = height + int(random(10000));
-        this.diameter = random(100, 300);
-      } 
-      else if (direction == "down") {
-        this.xPos = int(random(width));
-        this.yPos = 0 - int(random(10000));
-        this.diameter = random(100, 300);
-      }      
-
-    } else {
-      if (direction == "up") {
-        this.xPos = int(random(width));
-        this.yPos = height + int(random(10000));
-        this.diameter = random(100, 300);
-      }
-      else if (direction == "down") {
-        this.xPos = int(random(width));
-        this.yPos = 0 - int(random(10000));
-        this.diameter = random(100, 300);
-      }
-      
+    if (direction == "up") {
+      this.xPos = int(random(width));
+      this.yPos = height + int(random(height)) + 200;
+      this.diameter = int(random(height / 6, height / 3));
+    }
+    else if (direction == "down") {
+      this.xPos = int(random(width));
+      this.yPos = 0 - int(random(height));
+      this.diameter = int(random(height / 6, height / 3));
     }
   }
 
@@ -177,25 +135,18 @@ class Planet {
     if (direction == "up") {
       this.yPos -= speed;
       if (this.yPos + this.diameter < 0) {
-        planets.splice(this.arIndex, 1);
-        firstCreationPlanet = false;
-        for (let index = this.arIndex; index < planets.length; index++) {
-          planets[index].arIndex--;
-        }
-        overallIndexPlanets--;
-        planets.push(new Planet(false));
+        // Planet is out of window
+        this.xPos = int(random(width));
+        this.yPos = height + int(random(height)) + 2000;
+        this.diameter = int(random(height / 6, height / 3));
       }
     }
     else if (direction == "down") {
       this.yPos += speed;
       if (this.yPos - this.diameter > height) {
-        planets.splice(this.arIndex, 1);
-        firstCreationPlanet = false;
-        for (let index = this.arIndex; index < planets.length; index++) {
-          planets[index].arIndex--;
-        }
-        overallIndexPlanets--;
-        planets.push(new Planet(false));
+        this.xPos = int(random(width));
+        this.yPos = 0 - int(random(height));
+        this.diameter = int(random(height / 6, height / 3));
       }
     }
   }
