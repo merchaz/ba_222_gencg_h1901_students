@@ -1,197 +1,140 @@
-
-// Global var
-var canvas;
-
-var lines = [];
-var planets = [];
-var overallIndexLines;
-var overallIndexPlanets;
-var firstCreationLine;
-var firstCreationPlanet;
-var speed;
-var lineLength;
-var direction;
-var spliceCtrLine;
-var lastXline;
-let stepSize, rideDuration, startTime;
-let graphics, app;
-let capturer, fps;
+var stars = [];
+var shootingStar;
+var moon;
+var drawMode;
+var pg;
 
 function setup() {
-  var density = displayDensity();
-  pixelDensity(density);
-  createCanvas(6480 / density, 3840 / density);
-
-  // Capture settings
-  fps = 60;
-  //capturer = new CCapture({ format: 'png', framerate: fps });
-
-  // this is optional, but lets us see how the animation will look in browser.
-  frameRate(fps);
-
-  // start the recording
-  //capturer.start();
-
-  // Init Var
-  objects = [...Array(1000)].map(e => [random(width), random(height)]);
-  startTime = millis();
-  //rideDuration = getRideDuration(2);
-  overallIndexLines = 0;
-  overallIndexPlanets = 0;
-  lastXPos = 0;
-  firstCreationLine = true;
-  firstCreationPlanet = true;
-  lineLength = height * 2;
-  speed = 20;
-  direction = "up";
-  spliceCtrLine = 0;
-  lastXline = 0;
-
-  var lastYplanet = 0;
-  while (lastXline < width) {
-    lines.push(new randLine());
+	pixelDensity(1);
+  createCanvas(windowWidth, windowHeight);
+  frameRate(60);
+  for (var i = 0; i < 100; i++) {
+    stars.push(new Star());
   }
-  for (let index = 0; index < 6; index++) {
-    planets.push(new Planet(lastYplanet));
-    lastYplanet += 500;
-  }
+  shootingStar = new ShootingStar();
+  moon = new Moon();
+  pg = createGraphics(windowWidth, windowHeight);
 }
 
 function draw() {
-  background(0);
-  stroke(255);
+  background(220);
+  var color1 = color(0, 0, 153);
+  var color2 = color(204, 51, 0);
+  setGradient(0, 0, windowWidth, windowHeight, color1, color2);
 
-  // duration in milliseconds
-  // var duration = 25;
-  // var t = (millis() - startTime) / 1000;
-
-  // if we have passed t=duration then end the animation.
-  // if (t > duration) {
-    // noLoop();
-    // console.log('finished recording.');
-    // capturer.stop();
-    // capturer.save();
-    // return;
-  // }
-
-  for (let i = 0; i < lines.length; i++) {
-    strokeWeight(int(random(3, 5)));
-    lines[i].move();
-    lines[i].display();
+  for (var i = 0; i < 50; i++) {
+    stars[i].draw();
   }
-  for (let i = 0; i < planets.length; i++) {
-    planets[i].move();
-    planets[i].display();
+  shootingStar.draw();
+  moon.draw();
+  rotateSky(drawMode);
+  drawMountain();
+  image(pg, 0, windowHeight/2, 0, 0);
+}
+
+function drawMountain(){
+  pg.noStroke();//stroke(255);
+  pg.fill(180,180,180);
+  pg.beginShape();
+  for (var x = 0; x < width; x++) {
+	var nx = map(x, 0, width, 0, 10);
+	var y = (windowHeight/2) * noise(nx);
+	pg.vertex(x, y/2);
   }
-  // capturer.capture(document.getElementById('defaultCanvas0'));
+  pg.vertex(windowWidth, windowHeight);
+  pg.vertex(0,windowHeight);
+  pg.endShape();
+}
+
+function setGradient(x, y, w, h, c1, c2, axis) {
+  noFill();
+    for (let i = y; i <= y + h; i++) {
+      var inter = map(i, y, y + h, 0, 1);
+      var c = lerpColor(c1, c2, inter);
+      stroke(c);
+      line(x, i, x + w, i);
+    }  
+}
+
+function Star() {
+  this.x = random(windowWidth);
+  this.y = random(windowHeight + 400) - 400;
+  this.w = 5;//windowHeight / 200;
+  this.h = 5;//windowHeight / 200;
+}
+
+Star.prototype.draw = function() {
+  noStroke();
+  fill(255, 255, 0);
+  ellipse(this.x, this.y, this.w, this.h);
+  if (this.w == 5 && frameCount % 5 == 0) {
+    this.w = 7;
+    this.h = 7;
+  } else if(this.w == 7 && frameCount % 5 == 0){
+    this.w = 5;
+    this.h = 5;
+  }
+}
+
+function ShootingStar() {
+  this.x = random(windowWidth - 200);
+  this.y = random(windowHeight - 400);
+  this.w = 20;
+  this.h = 5;
+}
+
+ShootingStar.prototype.draw = function() {
+  noStroke();
+  fill(255, 255, 0);
+  ellipse(this.x, this.y, this.w, this.h);
+  if (this.h > 0) {
+    this.h -= 0.2;
+  }
+  this.w += 7;
+  this.x += 5;
+}
+
+function Moon() {
+  this.x = windowWidth / 2;
+  if(drawMode == 2){
+	this.y = windowHeight/5;
+	} 
+  else {
+	  this.y = windowHeight - windowHeight/3;
+	}
+  this.w = windowHeight / 10;
+  this.h = windowHeight / 10;
+}
+
+Moon.prototype.draw = function() {
+  noStroke();
+  fill(255, 255, 0);
+  ellipse(this.x, this.y, this.w, this.h);
+  //this.y += 1;
 }
 
 function keyPressed() {
-  // Clear sketch
-  if (keyCode === 32) background(255) // 32 = SPACE BAR 
-  if (key == 's' || key == 'S') saveThumb(width, height);
-  if (keyCode === 38) direction = "up"; // 38 = ArrowUp
-  if (keyCode === 40) direction = "down"; // 40 = ArrowDown
+
+  if (keyCode === 32) setup() // 32 = Space
+  if (keyCode === 38) drawMode = 2 // 38 = ArrowUp
+  if (keyCode === 40) drawMode = 1 // 40 = ArrowDown
+
 }
 
-// Thumb
-function saveThumb(w, h) {
-  let img = get(width / 2 - w / 2, height / 2 - h / 2, w, h);
-  save(img, 'thumb.jpg');
-}
-
-class randLine {
-  constructor() {
-    this.arIndex = overallIndexLines;
-    overallIndexLines++;
-    if (direction == "up") {
-      this.x1 = lastXline + int(random(10, 20)); //int(random(width));
-      lastXline = this.x1;
-      this.x2 = this.x1;
-      this.y1 = int(random(height * 3));
-      this.y2 = this.y1 + lineLength;
-    }
-    else if (direction == "down") {
-      this.x1 = int(random(width));
-      this.x2 = this.x1;
-      this.y1 = 0 - int(random(height * 5));
-      debugger;
-      this.y2 = this.y1 - lineLength;
-    }
-  }
-
-  move() {
-    if (direction == "up") {
-      this.y1 -= speed;
-      this.y2 -= speed;
-
-      if (this.y2 < 0) {
-        this.y1 = height + int(random(height));
-        this.y2 = this.y1 + lineLength;
-      }
-    }
-    else if (direction == "down") {
-      this.y1 += speed;
-      this.y2 += speed;
-
-      if (this.y2 > height) {
-        this.y1 = 0 - int(random(height));
-        this.y2 = this.y1 - lineLength;
-      }
-    }
-  }
-
-  display() {
-    line(this.x1, this.y1, this.x2, this.y2);
-  }
-}
-
-class Planet {
-  constructor(lastYpos) {
-    this.arIndex = overallIndexPlanets;
-    overallIndexPlanets++;
-    if (direction == "up") {
-      this.xPos = int(random(width));
-      this.yPos = height + int(random(height)) + lastYpos;
-      this.diameter = int(random(height / 10, height / 4));
-    }
-    else if (direction == "down") {
-      this.xPos = int(random(width));
-      this.yPos = 0 - int(random(height));
-      this.diameter = int(random(height / 6, height / 3));
-    }
-  }
-
-  move() {
-    if (direction == "up") {
-      this.yPos -= speed;
-      if (this.yPos + this.diameter < 0) {
-        // Planet is out of window
-        this.xPos = int(random(width));
-        this.yPos = height + int(random(height)) + 2000;
-        this.diameter = int(random(height / 6, height / 3));
-      }
-    }
-    else if (direction == "down") {
-      this.yPos += speed;
-      if (this.yPos - this.diameter > height) {
-        this.xPos = int(random(width));
-        this.yPos = 0 - int(random(height)) - 2000;
-        this.diameter = int(random(height / 6, height / 3));
-      }
-    }
-  }
-
-  display() {
-    noStroke();
-    fill(255);
-    ellipse(this.xPos, this.yPos, this.diameter);
-    fill(0);
-    ellipse(this.xPos + 5, this.yPos + 7, this.diameter);
-  }
-}
-// Thumb
-function saveThumb(w, h) {
-  let img = get(width / 2 - w / 2, height / 2 - h / 2, w, h);
-  save(img, 'thumb.jpg');
+function rotateSky(drawMode){
+	if(drawMode == 2){
+		moon.y += 1;
+		for (var i = 0; i < 50; i++) {
+			stars[i].y += 1;
+		}
+	}
+	else if(drawMode == 1){
+		moon.y -= 1;
+		for (var i = 0; i < 50; i++) {
+			stars[i].y -= 1;
+		}
+	}
+	else {
+		// do nothing
+	}
 }
