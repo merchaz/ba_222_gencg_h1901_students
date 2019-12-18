@@ -6,7 +6,8 @@ var pg;
 
 function setup() {
 	pixelDensity(1);
-  createCanvas(windowWidth, windowHeight);
+  canvas = createCanvas(windowWidth, windowHeight);
+  canvas.parent("p5Container");
   frameRate(60);
   for (var i = 0; i < 100; i++) {
     stars.push(new Star());
