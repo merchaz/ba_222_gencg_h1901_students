@@ -1,6 +1,6 @@
 
 // Global var
-var canvas;
+//var canvas;
 
 var lines = [];
 var planets = [];
