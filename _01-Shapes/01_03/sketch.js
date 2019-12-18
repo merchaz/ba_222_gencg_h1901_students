@@ -1,7 +1,6 @@
 
 // Global var
 var canvas;
-
 var lines = [];
 var planets = [];
 var overallIndexLines;
@@ -13,43 +12,28 @@ var lineLength;
 var direction;
 var spliceCtrLine;
 var lastXline;
-let stepSize, rideDuration, startTime;
-let graphics, app;
-let capturer, fps;
 
 function setup() {
-  var density = displayDensity();
-  pixelDensity(density);
-  createCanvas(6480 / density, 3840 / density);
-
-  // Capture settings
-  fps = 60;
-  //capturer = new CCapture({ format: 'png', framerate: fps });
-
-  // this is optional, but lets us see how the animation will look in browser.
-  frameRate(fps);
-
-  // start the recording
-  //capturer.start();
-
+  pixelDensity(1);
+  canvas = createCanvas(width, height);
+  canvas.parent("p5Container");
+  frameRate(60);
   // Init Var
-  objects = [...Array(1000)].map(e => [random(width), random(height)]);
-  startTime = millis();
-  rideDuration = getRideDuration(2);
   overallIndexLines = 0;
   overallIndexPlanets = 0;
   lastXPos = 0;
-  firstCreationLine = true;
-  firstCreationPlanet = true;
-  lineLength = height * 2;
-  speed = 20;
-  direction = "up";
   spliceCtrLine = 0;
   lastXline = 0;
+  speed = 20;
+  lineLength = height * 2;
+  direction = "up";
+  firstCreationLine = true;
+  firstCreationPlanet = true;
 
+  // Setup first planets and lines
   var lastYplanet = 0;
   while (lastXline < width) {
-    lines.push(new randLine());
+    lines.push(new HorizontalLine());
   }
   for (let index = 0; index < 6; index++) {
     planets.push(new Planet(lastYplanet));
@@ -61,61 +45,43 @@ function draw() {
   background(0);
   stroke(255);
 
-  // duration in milliseconds
-  // var duration = 25;
-  // var t = (millis() - startTime) / 1000;
-
-  // if we have passed t=duration then end the animation.
-  // if (t > duration) {
-    // noLoop();
-    // console.log('finished recording.');
-    // capturer.stop();
-    // capturer.save();
-    // return;
-  // }
-
+  // move and draw horizontal lines
   for (let i = 0; i < lines.length; i++) {
     strokeWeight(int(random(3, 5)));
     lines[i].move();
     lines[i].display();
   }
+  // move and draw planets
   for (let i = 0; i < planets.length; i++) {
     planets[i].move();
     planets[i].display();
   }
-  // capturer.capture(document.getElementById('defaultCanvas0'));
 }
 
 function keyPressed() {
-  // Clear sketch
+  // different options
   if (keyCode === 32) background(255) // 32 = SPACE BAR 
-  if (key == 's' || key == 'S') saveThumb(width, height);
   if (keyCode === 38) direction = "up"; // 38 = ArrowUp
   if (keyCode === 40) direction = "down"; // 40 = ArrowDown
 }
 
-// Thumb
-function saveThumb(w, h) {
-  let img = get(width / 2 - w / 2, height / 2 - h / 2, w, h);
-  save(img, 'thumb.jpg');
-}
-
-class randLine {
+class HorizontalLine {
   constructor() {
     this.arIndex = overallIndexLines;
     overallIndexLines++;
+    // line creation when direction up
     if (direction == "up") {
-      this.x1 = lastXline + int(random(10, 20)); //int(random(width));
+      this.x1 = lastXline + int(random(10, 20));
       lastXline = this.x1;
       this.x2 = this.x1;
       this.y1 = int(random(height * 3));
       this.y2 = this.y1 + lineLength;
     }
+    // line creation when direction down
     else if (direction == "down") {
       this.x1 = int(random(width));
       this.x2 = this.x1;
       this.y1 = 0 - int(random(height * 5));
-      debugger;
       this.y2 = this.y1 - lineLength;
     }
   }
@@ -125,6 +91,7 @@ class randLine {
       this.y1 -= speed;
       this.y2 -= speed;
 
+      // when line out of window, move it to the other side
       if (this.y2 < 0) {
         this.y1 = height + int(random(height));
         this.y2 = this.y1 + lineLength;
@@ -134,6 +101,7 @@ class randLine {
       this.y1 += speed;
       this.y2 += speed;
 
+      // when line out of window, move it to the other side
       if (this.y2 > height) {
         this.y1 = 0 - int(random(height));
         this.y2 = this.y1 - lineLength;
@@ -142,6 +110,7 @@ class randLine {
   }
 
   display() {
+    // draw line
     line(this.x1, this.y1, this.x2, this.y2);
   }
 }
@@ -150,11 +119,14 @@ class Planet {
   constructor(lastYpos) {
     this.arIndex = overallIndexPlanets;
     overallIndexPlanets++;
+
+    // planet creation when direction up
     if (direction == "up") {
       this.xPos = int(random(width));
       this.yPos = height + int(random(height)) + lastYpos;
       this.diameter = int(random(height / 10, height / 4));
     }
+    // planet creation when direction down
     else if (direction == "down") {
       this.xPos = int(random(width));
       this.yPos = 0 - int(random(height));
@@ -165,8 +137,9 @@ class Planet {
   move() {
     if (direction == "up") {
       this.yPos -= speed;
-      if (this.yPos + this.diameter < 0) {
-        // Planet is out of window
+
+      // when planet out of window, move it to the other side
+      if (this.yPos + this.diameter < 0) {        
         this.xPos = int(random(width));
         this.yPos = height + int(random(height)) + 2000;
         this.diameter = int(random(height / 6, height / 3));
@@ -174,7 +147,9 @@ class Planet {
     }
     else if (direction == "down") {
       this.yPos += speed;
-      if (this.yPos - this.diameter > height) {
+
+      // when planet out of window, move it to the other side
+      if (this.yPos - this.diameter > height) {    
         this.xPos = int(random(width));
         this.yPos = 0 - int(random(height)) - 2000;
         this.diameter = int(random(height / 6, height / 3));
@@ -183,15 +158,11 @@ class Planet {
   }
 
   display() {
+    // draw planet with shadow
     noStroke();
     fill(255);
     ellipse(this.xPos, this.yPos, this.diameter);
     fill(0);
     ellipse(this.xPos + 5, this.yPos + 7, this.diameter);
   }
-}
-// Thumb
-function saveThumb(w, h) {
-  let img = get(width / 2 - w / 2, height / 2 - h / 2, w, h);
-  save(img, 'thumb.jpg');
 }
