@@ -35,7 +35,7 @@ function setup() {
   // Init Var
   objects = [...Array(1000)].map(e => [random(width), random(height)]);
   startTime = millis();
-  rideDuration = getRideDuration(2);
+  //rideDuration = getRideDuration(2);
   overallIndexLines = 0;
   overallIndexPlanets = 0;
   lastXPos = 0;
