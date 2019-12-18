@@ -17,5 +17,3 @@ collections:
   01-Shapes:
     output: true
     
-  02-Agents:
-    output: false

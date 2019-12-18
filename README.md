@@ -16,7 +16,6 @@ This repo hold students' work for the class "I.BA_222_GENCG.H1901 - Winter 2019"
 │       └── thumb.jpg (sketch thumb)            +
 │   ├── 01_01                                   +
 │   └── ...                                     +
-├── _02-Agents        (Agents collection)       +
 
 ├── _includes         (gh pages layout blocks)  + GH PAGES SETTINGS
 ├── _layout           (gh pages layout)         +
