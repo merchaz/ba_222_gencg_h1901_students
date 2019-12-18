@@ -15,7 +15,7 @@ var lastXline;
 
 function setup() {
   pixelDensity(1);
-  canvas = createCanvas(width, height);
+  canvas = createCanvas(1920, 969);
   canvas.parent("p5Container");
   frameRate(60);
   // Init Var
