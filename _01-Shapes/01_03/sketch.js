@@ -12,6 +12,7 @@ var speed;
 var lineLength;
 var direction;
 var spliceCtrLine;
+var lastXline;
 let stepSize, rideDuration, startTime;
 let graphics, app;
 let capturer, fps;
@@ -23,41 +24,36 @@ function setup() {
 
   // Capture settings
   fps = 60;
-  capturer = new CCapture({ format: 'png', framerate: fps });
+  //capturer = new CCapture({ format: 'png', framerate: fps });
 
   // this is optional, but lets us see how the animation will look in browser.
   frameRate(fps);
 
   // start the recording
-  capturer.start();
+  //capturer.start();
 
   // Init Var
-  objects = [...Array(1000)].map(e => [random(width), random(height)]);  
+  objects = [...Array(1000)].map(e => [random(width), random(height)]);
   startTime = millis();
   rideDuration = getRideDuration(2);
-
-  //canvas = createCanvas(windowWidth, windowHeight);
-  //canvas.parent("p5Container");
   overallIndexLines = 0;
   overallIndexPlanets = 0;
   lastXPos = 0;
   firstCreationLine = true;
   firstCreationPlanet = true;
-  lineLength = height * 2;// / 3 * 2;
+  lineLength = height * 2;
   speed = 20;
   direction = "up";
   spliceCtrLine = 0;
-
+  lastXline = 0;
 
   var lastYplanet = 0;
-  for (let index = 0; index < 150; index++) {
-    if (index % 30 == 0) {
-      planets.push(new Planet(lastYplanet));
-      lastYplanet += 500;
-    }
-    else {
-      lines.push(new randLine());
-    }
+  while (lastXline < width) {
+    lines.push(new randLine());
+  }
+  for (let index = 0; index < 6; index++) {
+    planets.push(new Planet(lastYplanet));
+    lastYplanet += 500;
   }
 }
 
@@ -66,21 +62,20 @@ function draw() {
   stroke(255);
 
   // duration in milliseconds
-  var duration = 5;
-  var t = (millis() - startTime)/1000;
+  // var duration = 25;
+  // var t = (millis() - startTime) / 1000;
 
   // if we have passed t=duration then end the animation.
-  if (t > duration) {
-    noLoop();
-    console.log('finished recording.');
-    capturer.stop();
-    capturer.save();
-    return;
-  }
-  
+  // if (t > duration) {
+    // noLoop();
+    // console.log('finished recording.');
+    // capturer.stop();
+    // capturer.save();
+    // return;
+  // }
 
   for (let i = 0; i < lines.length; i++) {
-    strokeWeight(5);
+    strokeWeight(int(random(3, 5)));
     lines[i].move();
     lines[i].display();
   }
@@ -88,8 +83,7 @@ function draw() {
     planets[i].move();
     planets[i].display();
   }
-
-  capturer.capture(document.getElementById('defaultCanvas0'));
+  // capturer.capture(document.getElementById('defaultCanvas0'));
 }
 
 function keyPressed() {
@@ -111,7 +105,8 @@ class randLine {
     this.arIndex = overallIndexLines;
     overallIndexLines++;
     if (direction == "up") {
-      this.x1 = int(random(width));
+      this.x1 = lastXline + int(random(10, 20)); //int(random(width));
+      lastXline = this.x1;
       this.x2 = this.x1;
       this.y1 = int(random(height * 3));
       this.y2 = this.y1 + lineLength;
@@ -158,7 +153,7 @@ class Planet {
     if (direction == "up") {
       this.xPos = int(random(width));
       this.yPos = height + int(random(height)) + lastYpos;
-      this.diameter = int(random(height / 6, height / 3));
+      this.diameter = int(random(height / 10, height / 4));
     }
     else if (direction == "down") {
       this.xPos = int(random(width));

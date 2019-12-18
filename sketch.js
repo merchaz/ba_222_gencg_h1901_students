@@ -1,102 +1,195 @@
-// Noise generated circle
 
 // Global var
-// Some of the var might be initialised in gui.js
-var canvas, backgroundGrey, radius;
-var actRandomSeed, count, points, increment;
+var canvas;
+
+var lines = [];
+var planets = [];
+var overallIndexLines;
+var overallIndexPlanets;
+var firstCreationLine;
+var firstCreationPlanet;
+var speed;
+var lineLength;
+var direction;
+var spliceCtrLine;
+var lastXline;
+let stepSize, rideDuration, startTime;
+let graphics, app;
+let capturer, fps;
 
 function setup() {
-  // Canvas setup
-  canvas = createCanvas(windowWidth, windowHeight);
-  canvas.parent("p5Container");
-  // Detect screen density (retina)
-  // Comment it out if the sketch is too slow
   var density = displayDensity();
   pixelDensity(density);
-  // Init var
-  // some of the var are initialised in gui.js
-  backgroundGrey = 0;
-  count = 150;
-  points = [count];
-  background(backgroundGrey);
-  radius = 20;
-  increment = +1;
+  createCanvas(6480 / density, 3840 / density);
+
+  // Capture settings
+  fps = 60;
+  //capturer = new CCapture({ format: 'png', framerate: fps });
+
+  // this is optional, but lets us see how the animation will look in browser.
+  frameRate(fps);
+
+  // start the recording
+  //capturer.start();
+
+  // Init Var
+  objects = [...Array(1000)].map(e => [random(width), random(height)]);
+  startTime = millis();
+  rideDuration = getRideDuration(2);
+  overallIndexLines = 0;
+  overallIndexPlanets = 0;
+  lastXPos = 0;
+  firstCreationLine = true;
+  firstCreationPlanet = true;
+  lineLength = height * 2;
+  speed = 20;
+  direction = "up";
+  spliceCtrLine = 0;
+  lastXline = 0;
+
+  var lastYplanet = 0;
+  while (lastXline < width) {
+    lines.push(new randLine());
+  }
+  for (let index = 0; index < 6; index++) {
+    planets.push(new Planet(lastYplanet));
+    lastYplanet += 500;
+  }
 }
 
 function draw() {
-  // background(backgroundGrey, 20);
-  smooth();
+  background(0);
+  stroke(255);
 
-  // Create points array
-  let faderX = .1;
-  let t = millis()/1000;
-  // let r = map(mouseY,0,height,10,radius);
-  if (radius>width/1.7 && radius>height/1.7) increment = -increment;
-  else if (radius<20) increment = -increment;
-  radius += increment; 
-  let angle = radians(360/count);
+  // duration in milliseconds
+  // var duration = 25;
+  // var t = (millis() - startTime) / 1000;
 
-  for (let i=0; i<count; i++){
-    let radiusRand = radius - noise(t, i*faderX)*50;
-    let x = width/2 + cos(angle*i)*radiusRand;
-    let y = height/2 + sin(angle*i)*radiusRand;
-    points[i] = createVector(x,y);
+  // if we have passed t=duration then end the animation.
+  // if (t > duration) {
+    // noLoop();
+    // console.log('finished recording.');
+    // capturer.stop();
+    // capturer.save();
+    // return;
+  // }
+
+  for (let i = 0; i < lines.length; i++) {
+    strokeWeight(int(random(3, 5)));
+    lines[i].move();
+    lines[i].display();
   }
-
-  // Draw
-  // stroke(noise(t/10)*255,0,noise(t/1)*100,255);
-  strokeHsluv(noise(t/10)*360,noise(t/20)*50,noise(t)*80);
-  strokeWeight(20);
-  noFill();
-  beginShape();
-  for (let i=0; i<count; i++){
-    // fill(255);
-    // ellipse(points[i].x, points[i].y,2,2);
-    // noFill();
-    curveVertex(points[i].x, points[i].y);
-    if (i==0 || i==count-1) curveVertex(points[i].x, points[i].y);
+  for (let i = 0; i < planets.length; i++) {
+    planets[i].move();
+    planets[i].display();
   }
-  endShape(CLOSE);
+  // capturer.capture(document.getElementById('defaultCanvas0'));
 }
 
 function keyPressed() {
-  if (key == DELETE || key == BACKSPACE) background(360);  
-  if (key == 's' || key == 'S') saveThumb(650, 350);
+  // Clear sketch
+  if (keyCode === 32) background(255) // 32 = SPACE BAR 
+  if (key == 's' || key == 'S') saveThumb(width, height);
+  if (keyCode === 38) direction = "up"; // 38 = ArrowUp
+  if (keyCode === 40) direction = "down"; // 40 = ArrowDown
 }
 
-// Color functions
-function fillHsluv(h, s, l) {
-  var rgb = hsluv.hsluvToRgb([h, s, l]);
-  fill(rgb[0] * 255, rgb[1] * 255, rgb[2] * 255);
+// Thumb
+function saveThumb(w, h) {
+  let img = get(width / 2 - w / 2, height / 2 - h / 2, w, h);
+  save(img, 'thumb.jpg');
 }
 
-function strokeHsluv(h, s, l) {
-  var rgb = hsluv.hsluvToRgb([h, s, l]);
-  stroke(rgb[0] * 255, rgb[1] * 255, rgb[2] * 255);
+class randLine {
+  constructor() {
+    this.arIndex = overallIndexLines;
+    overallIndexLines++;
+    if (direction == "up") {
+      this.x1 = lastXline + int(random(10, 20)); //int(random(width));
+      lastXline = this.x1;
+      this.x2 = this.x1;
+      this.y1 = int(random(height * 3));
+      this.y2 = this.y1 + lineLength;
+    }
+    else if (direction == "down") {
+      this.x1 = int(random(width));
+      this.x2 = this.x1;
+      this.y1 = 0 - int(random(height * 5));
+      debugger;
+      this.y2 = this.y1 - lineLength;
+    }
+  }
+
+  move() {
+    if (direction == "up") {
+      this.y1 -= speed;
+      this.y2 -= speed;
+
+      if (this.y2 < 0) {
+        this.y1 = height + int(random(height));
+        this.y2 = this.y1 + lineLength;
+      }
+    }
+    else if (direction == "down") {
+      this.y1 += speed;
+      this.y2 += speed;
+
+      if (this.y2 > height) {
+        this.y1 = 0 - int(random(height));
+        this.y2 = this.y1 - lineLength;
+      }
+    }
+  }
+
+  display() {
+    line(this.x1, this.y1, this.x2, this.y2);
+  }
 }
 
-function colorHsluv(h, s, l) {
-  var rgb = hsluv.hsluvToRgb([h, s, l]);
-  return color(rgb[0] * 255, rgb[1] * 255, rgb[2] * 255);
+class Planet {
+  constructor(lastYpos) {
+    this.arIndex = overallIndexPlanets;
+    overallIndexPlanets++;
+    if (direction == "up") {
+      this.xPos = int(random(width));
+      this.yPos = height + int(random(height)) + lastYpos;
+      this.diameter = int(random(height / 10, height / 4));
+    }
+    else if (direction == "down") {
+      this.xPos = int(random(width));
+      this.yPos = 0 - int(random(height));
+      this.diameter = int(random(height / 6, height / 3));
+    }
+  }
+
+  move() {
+    if (direction == "up") {
+      this.yPos -= speed;
+      if (this.yPos + this.diameter < 0) {
+        // Planet is out of window
+        this.xPos = int(random(width));
+        this.yPos = height + int(random(height)) + 2000;
+        this.diameter = int(random(height / 6, height / 3));
+      }
+    }
+    else if (direction == "down") {
+      this.yPos += speed;
+      if (this.yPos - this.diameter > height) {
+        this.xPos = int(random(width));
+        this.yPos = 0 - int(random(height)) - 2000;
+        this.diameter = int(random(height / 6, height / 3));
+      }
+    }
+  }
+
+  display() {
+    noStroke();
+    fill(255);
+    ellipse(this.xPos, this.yPos, this.diameter);
+    fill(0);
+    ellipse(this.xPos + 5, this.yPos + 7, this.diameter);
+  }
 }
-
-// Tools
-
-// resize canvas when the window is resized
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight, false);
-}
-
-//  conversion
-function toInt(value) {
-  return ~~value;
-}
-
-// Timestamp
-function timestamp() {
-  return Date.now();
-}
-
 // Thumb
 function saveThumb(w, h) {
   let img = get(width / 2 - w / 2, height / 2 - h / 2, w, h);
