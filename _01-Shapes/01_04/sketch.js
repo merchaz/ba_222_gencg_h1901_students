@@ -8,6 +8,8 @@ function setup() {
 	pixelDensity(1);
   createCanvas(windowWidth, windowHeight);
   frameRate(60);
+
+  // setup sky
   for (var i = 0; i < 100; i++) {
     stars.push(new Star());
   }
@@ -17,23 +19,30 @@ function setup() {
 }
 
 function draw() {
+
+  // draw gradient background
   background(220);
   var color1 = color(0, 0, 153);
   var color2 = color(204, 51, 0);
   setGradient(0, 0, windowWidth, windowHeight, color1, color2);
 
+  // draw sky and move it
   for (var i = 0; i < 50; i++) {
     stars[i].draw();
   }
   shootingStar.draw();
   moon.draw();
   rotateSky(drawMode);
+
+  // draw mountain line with noise
   drawMountain();
   image(pg, 0, windowHeight/2, 0, 0);
 }
 
 function drawMountain(){
-  pg.noStroke();//stroke(255);
+
+  // noise function to draw mountain line
+  pg.noStroke();
   pg.fill(180,180,180);
   pg.beginShape();
   for (var x = 0; x < width; x++) {
@@ -59,14 +68,16 @@ function setGradient(x, y, w, h, c1, c2, axis) {
 function Star() {
   this.x = random(windowWidth);
   this.y = random(windowHeight + 400) - 400;
-  this.w = 5;//windowHeight / 200;
-  this.h = 5;//windowHeight / 200;
+  this.w = 5;
+  this.h = 5;
 }
 
 Star.prototype.draw = function() {
   noStroke();
   fill(255, 255, 0);
   ellipse(this.x, this.y, this.w, this.h);
+
+  // star blinking
   if (this.w == 5 && frameCount % 5 == 0) {
     this.w = 7;
     this.h = 7;
@@ -87,6 +98,8 @@ ShootingStar.prototype.draw = function() {
   noStroke();
   fill(255, 255, 0);
   ellipse(this.x, this.y, this.w, this.h);
+
+  // fadeout of shooting star
   if (this.h > 0) {
     this.h -= 0.2;
   }
@@ -110,11 +123,10 @@ Moon.prototype.draw = function() {
   noStroke();
   fill(255, 255, 0);
   ellipse(this.x, this.y, this.w, this.h);
-  //this.y += 1;
 }
 
 function keyPressed() {
-
+  // key commands
   if (keyCode === 32) setup() // 32 = Space
   if (keyCode === 38) drawMode = 2 // 38 = ArrowUp
   if (keyCode === 40) drawMode = 1 // 40 = ArrowDown
@@ -122,6 +134,7 @@ function keyPressed() {
 }
 
 function rotateSky(drawMode){
+  // rotation based on direction through keypress
 	if(drawMode == 2){
 		moon.y += 1;
 		for (var i = 0; i < 50; i++) {
