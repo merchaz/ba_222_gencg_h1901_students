@@ -20,7 +20,8 @@ let capturer, fps;
 function setup() {
   var density = displayDensity();
   pixelDensity(density);
-  createCanvas(6480 / density, 3840 / density);
+  canvas = createCanvas(width, height);
+  canvas.parent("p5Container");
 
   // Capture settings
   fps = 60;
