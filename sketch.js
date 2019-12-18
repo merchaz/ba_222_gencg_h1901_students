@@ -14,10 +14,10 @@ var spliceCtrLine;
 var lastXline;
 
 function setup() {
-  frameRate(60);
+  pixelDensity(1);
   canvas = createCanvas(width, height);
   canvas.parent("p5Container");
-
+  frameRate(60);
   // Init Var
   overallIndexLines = 0;
   overallIndexPlanets = 0;
